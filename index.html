@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+  </head>
+  <body ng-app="app" ng-controller="cc">
+   
+
+    <input type="text" ng-model="search" name="" id="" />
+  <select ng-model="ndata" ng-options="i.name for i in list" id=""></select>
+  <select ng-model="order" id="">
+    <option value="Ascending">ascending</option>
+    <option value="descending">descending</option>
+  </select>
+ 
+    <form>
+      <input type="text" ng-model="data.name" name="" id="" />
+      <input type="text" ng-model="data.price" name="" id="" />
+      <input type="text" ng-model="data.qty" name="" id="" />
+      <input type="submit" ng-click="sub()" name="" id="" />
+    </form>
+    <form ng-show="mode">
+      <input type="text" ng-model="up.name" name="" id="" />
+      <input type="text" ng-model="up.price" name="" id="" />
+      <input type="text" ng-model="up.qty" name="" id="" />
+      <input type="submit" ng-click="update()" name="" id="" />
+    </form>
+    <table>
+      <tr>
+        <th>name</th>
+        <th>price</th>
+        <th>qty</th>
+        <th>delete</th>
+        <th>edit</th>
+      </tr>
+      <tr ng-repeat="i in list | filter:search | filter:ndata | orderBy:order=='Ascending' ? 'price':-'price'"  >
+        <td>{{i.name}}</td>
+        <td>{{i.price}}</td>
+        <td>{{i.qty}}</td>
+        <td>
+          <input type="button" value="delete" ng-click="del(i)" name="" id="" />
+        </td>
+        <td>
+          <input type="button" value="edit" ng-click="edit(i)" name="" id="" />
+        </td>
+      </tr>
+    </table>
+    <script>
+      const app = angular.module("app", []);
+      app.controller("cc", ($scope, $http) => {
+        $scope.list = [];
+        $scope.data = {};
+        $scope.up = {};
+        $scope.mode = false;
+$scope.order="Ascending"
+        $scope.edit = (item) => {
+          $scope.mode = true;
+          $scope.up = {
+            _id: item._id,
+            name: item.name,
+            price: item.price,
+            qty: item.qty,
+          };
+        };
+        $scope.update = () => {
+          $http.put(`/data/${$scope.up._id}`, $scope.up).then((res) => {
+            $scope.list = res.data;
+            $scope.getdata();
+          });
+        };
+        $scope.sub = () => {
+          $http.post("/data", $scope.data).then(() => {
+            $scope.getdata();
+          });
+        };
+
+        $scope.getdata = () => {
+          $http.get("/data").then((res) => {
+            $scope.list = res.data;
+          });
+        };
+        $scope.del = (item) => {
+          $http.delete(`/data/${item._id}`).then((res) => {
+            $scope.list = res.data;
+            $scope.getdata();
+          });
+        };
+        $scope.getdata();
+      });
+    </script>
+  </body>
+</html>
